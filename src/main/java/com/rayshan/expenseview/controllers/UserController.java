@@ -2,6 +2,7 @@ package com.rayshan.expenseview.controllers;
 
 import com.rayshan.expenseview.modals.UserModal;
 import com.rayshan.expenseview.services.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Log4j2
 public class UserController {
     private UserService userService;
 
@@ -21,6 +23,9 @@ public class UserController {
 
     @GetMapping("/users")
     public List<UserModal> getAllUsers() {
-        return userService.getAllUsers();
+        log.info("Request received");
+        List<UserModal> allUsers = userService.getAllUsers();
+        log.info("Returning response.");
+        return allUsers;
     }
 }
