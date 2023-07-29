@@ -24,8 +24,10 @@ public class UserController {
     @GetMapping("/users")
     public List<UserModal> getAllUsers() {
         log.info("Request received");
+        System.out.println("sout: Request received");
         List<UserModal> allUsers = userService.getAllUsers();
         log.info("Returning response.");
+        System.out.println("sout: Returning response.");
         return allUsers;
     }
 }
