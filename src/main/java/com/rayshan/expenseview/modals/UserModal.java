@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class UserModal {
     private int userId;
-    private String userName;
-    private String userPassword;
+    private String name;
+    private String password;
+    private String email;
 }
