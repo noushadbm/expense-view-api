@@ -6,6 +6,7 @@ import com.rayshan.expenseview.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +40,8 @@ public class UserService {
         userEntity.setId(++maxId);
         userEntity.setUserName(userDetail.getName());
         userEntity.setUserPassword(passwordService.encrypt(userDetail.getPassword()));
+        userEntity.setEmail(userEntity.getEmail());
+        userEntity.setCreateTime(LocalDateTime.now());
         userRepository.save(userEntity);
         return toDTO(userEntity);
     }
