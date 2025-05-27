@@ -4,6 +4,7 @@ import com.rayshan.expenseview.entities.UserEntity;
 import com.rayshan.expenseview.modals.UserModal;
 import com.rayshan.expenseview.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class UserService {
 
     public UserModal getUserById(int id) {
         Optional<UserEntity> userOpt = userRepository.findById(id);
-        UserEntity user = userOpt.orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return toDTO(user);
     }
 

@@ -1,0 +1,80 @@
+package com.rayshan.expenseview.services;
+
+import com.rayshan.expenseview.entities.ExpenseEntity;
+import com.rayshan.expenseview.entities.Metadata;
+import com.rayshan.expenseview.modals.ExpenseData;
+import com.rayshan.expenseview.modals.UserModal;
+import com.rayshan.expenseview.repositories.ExpenseRepository;
+import com.rayshan.expenseview.repositories.MetadataRepository;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+@Log4j2
+public class ExpenseService {
+    private final UserService userService;
+    private final MetadataRepository metadataRepository;
+    private final ExpenseRepository expenseRepository;
+
+    public ExpenseService(MetadataRepository metadataRepository, ExpenseRepository expenseRepository, UserService userService) {
+        this.metadataRepository = metadataRepository;
+        this.expenseRepository = expenseRepository;
+        this.userService = userService;
+    }
+    @Transactional
+    public Map<String, Object> createMetadata(Integer userId) {
+        userService.getUserById(userId); // Ensure user exists
+        Metadata metadata = new Metadata();
+        metadata.setUserId(userId);
+        Metadata saved = metadataRepository.save(metadata);
+        Integer metadataId = saved.getId();
+        if (metadataId == null) {
+            throw new RuntimeException("Failed to create metadata");
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("metadataId", metadataId);
+        return data;
+    }
+
+    @Transactional
+    public Map<String, Object> updateMetadata(Integer userId, Integer metadataId, ExpenseData expenseData) {
+        Metadata metaData = metadataRepository.findByIdAndUserId(metadataId, userId);
+        if (metaData == null) {
+            throw new RuntimeException("Metadata not found for the given user");
+        }
+
+        List<ExpenseEntity> expenseEntities = expenseData.getEntries().stream().map(
+                entry -> {
+                    ExpenseEntity expenseEntity = new ExpenseEntity();
+                    expenseEntity.setMetadataId(metadataId);
+                    expenseEntity.setId(entry.getId());
+                    expenseEntity.setTitle(entry.getTitle());
+                    expenseEntity.setAmount(entry.getAmount());
+                    expenseEntity.setCategory(entry.getCategory());
+                    expenseEntity.setDescription(entry.getDescription());
+//                    LocalDateTime entryDate = Instant.ofEpochMilli(entry.getEntryDate())
+//                            .atZone(ZoneId.systemDefault())
+//                            .toLocalDateTime();
+//                    expenseEntity.setEntryDate(entryDate);
+                    expenseEntity.setEntryDate(BigInteger.valueOf(entry.getEntryDate()));
+                    return expenseEntity;
+                }
+        ).collect(Collectors.toList());
+        List<ExpenseEntity> savedEntities = expenseRepository.saveAll(expenseEntities);
+        log.info("Saved {} expense entries for metadata ID {}", savedEntities.size(), metadataId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("count", savedEntities.size());
+        return data;
+    }
+}
