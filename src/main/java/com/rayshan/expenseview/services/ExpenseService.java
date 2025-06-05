@@ -77,4 +77,20 @@ public class ExpenseService {
         data.put("count", savedEntities.size());
         return data;
     }
+
+    @Transactional
+    public Map<String, Object> finishSync(Integer userId, Integer metadataId) {
+        Metadata metadata = metadataRepository.findByIdAndUserId(metadataId, userId);
+        if(metadata == null) {
+            throw new RuntimeException("Metadata not found for the given user");
+        }
+        metadata.setUpdateTime(LocalDateTime.now());
+        metadata.setStatus("FINISHED");
+        Metadata updatedMetadata = metadataRepository.save(metadata);
+        log.info("Metadata updated: {}", updatedMetadata);
+        long count = expenseRepository.countByMetadataId(metadataId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("rowsUpdated", count);
+        return data;
+    }
 }

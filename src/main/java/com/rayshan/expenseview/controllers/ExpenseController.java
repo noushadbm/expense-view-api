@@ -47,13 +47,13 @@ public class ExpenseController {
     @PostMapping("/{userId}/sync/{metadataId}/finish")
     public ApiResponse<Map<String, Object>> syncFinish(@PathVariable Integer userId, @PathVariable Integer metadataId) {
         log.info("Request received to initialize sync for user with ID: {}", userId);
-        Map<String, Object> metadata = expenseService.createMetadata(userId);
+        Map<String, Object> metadata = expenseService.finishSync(userId, metadataId);
         ApiResponse<Map<String, Object>> response = new ApiResponse<>();
         response.setStatusCode(200);
         response.setStatusText("SUCCESS");
-        response.setMessage("Metadata created successfully");
+        response.setMessage("Expense sync finished successfully");
         response.setData(metadata);
-        log.info("Returning response.");
+        log.info("Returning response from syncFinish");
         return response;
     }
 }

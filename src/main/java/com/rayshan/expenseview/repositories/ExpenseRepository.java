@@ -4,4 +4,6 @@ import com.rayshan.expenseview.entities.ExpenseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>  {
+
+    long countByMetadataId(Integer metadataId);
 }
