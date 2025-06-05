@@ -2,6 +2,7 @@ package com.rayshan.expenseview.services;
 
 import com.rayshan.expenseview.entities.AuthEntity;
 import com.rayshan.expenseview.entities.UserEntity;
+import com.rayshan.expenseview.exception.ExpenseException;
 import com.rayshan.expenseview.modals.AuthResponse;
 import com.rayshan.expenseview.repositories.AuthRepository;
 import com.rayshan.expenseview.repositories.UserRepository;
@@ -9,10 +10,15 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.ZonedDateTime;
+
+import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
 
 @Service
 public class AuthService {
@@ -26,10 +32,10 @@ public class AuthService {
         this.authRepository = authRepository;
     }
     @Transactional
-    public AuthResponse login(String username, String password) {
+    public AuthResponse login(String username, String password) throws ExpenseException {
         List<UserEntity> userList = this.userRepository.findByUserName(username);
         if(userList.isEmpty()) {
-            throw new RuntimeException("User not found");
+            throw new ExpenseException("User not found");
         }
 
         UserEntity user = userList.get(0);
@@ -61,10 +67,15 @@ public class AuthService {
         authResponse.setUserId(userId);
         authResponse.setUserName(username);
         authResponse.setToken(token);
-        authResponse.setExpiry(instant);
+        authResponse.setExpiry(getExpiryTime());
 
         return authResponse;
     }
 
-
+    private long getExpiryTime() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return zonedDateTime.toInstant().toEpochMilli();
+    }
 }

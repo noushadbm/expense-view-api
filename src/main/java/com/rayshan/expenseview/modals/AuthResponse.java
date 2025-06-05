@@ -9,5 +9,5 @@ public class AuthResponse {
     private int userId;
     private String userName;
     private String token;
-    private Instant expiry;
+    private long expiry;
 }

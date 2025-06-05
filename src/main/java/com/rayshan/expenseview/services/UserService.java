@@ -1,6 +1,7 @@
 package com.rayshan.expenseview.services;
 
 import com.rayshan.expenseview.entities.UserEntity;
+import com.rayshan.expenseview.exception.ExpenseException;
 import com.rayshan.expenseview.modals.UserModal;
 import com.rayshan.expenseview.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,9 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserModal getUserById(int id) {
+    public UserModal getUserById(int id) throws ExpenseException {
         Optional<UserEntity> userOpt = userRepository.findById(id);
-        UserEntity user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        UserEntity user = userOpt.orElseThrow(() -> new ExpenseException("User not found"));
         return toDTO(user);
     }
 

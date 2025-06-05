@@ -2,6 +2,7 @@ package com.rayshan.expenseview.services;
 
 import com.rayshan.expenseview.entities.ExpenseEntity;
 import com.rayshan.expenseview.entities.Metadata;
+import com.rayshan.expenseview.exception.ExpenseException;
 import com.rayshan.expenseview.modals.ExpenseData;
 import com.rayshan.expenseview.modals.UserModal;
 import com.rayshan.expenseview.repositories.ExpenseRepository;
@@ -32,16 +33,22 @@ public class ExpenseService {
         this.userService = userService;
     }
     @Transactional
-    public Map<String, Object> createMetadata(Integer userId) {
-        userService.getUserById(userId); // Ensure user exists
+    public Map<String, Object> createMetadata(Integer userId) throws ExpenseException {
+        UserModal user = userService.getUserById(userId); // Ensure user exists
+        if (user == null) {
+            log.error("User with ID {} not found", userId);
+            throw new ExpenseException("User not found");
+        }
         Metadata metadata = new Metadata();
         metadata.setUserId(userId);
         Metadata saved = metadataRepository.save(metadata);
         Integer metadataId = saved.getId();
         if (metadataId == null) {
+            log.error("Failed to create metadata for user ID: {}", userId);
             throw new RuntimeException("Failed to create metadata");
         }
 
+        log.info("Generated metadata ID: {}", metadataId);
         Map<String, Object> data = new HashMap<>();
         data.put("metadataId", metadataId);
         return data;
