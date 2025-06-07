@@ -57,4 +57,17 @@ public class ExpenseController {
         log.info("Returning response from syncFinish");
         return response;
     }
+
+    @GetMapping("/{userId}/restore/start")
+    public ApiResponse<Map<String, Object>> initRestore(@PathVariable Integer userId) throws ExpenseException {
+        log.info("Request received to restore init for user: {}", userId);
+        Map<String, Object> metadata = expenseService.initRestore(userId);
+        ApiResponse<Map<String, Object>> response = new ApiResponse<>();
+        response.setStatusCode(0);
+        response.setStatusMsg("SUCCESS");
+        response.setMessage("Expense restore initialized successfully");
+        response.setData(metadata);
+        log.info("Returning response from initRestore");
+        return response;
+    }
 }

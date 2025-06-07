@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.rayshan.expenseview.common.Constants.PAGE_SIZE;
+
 @Service
 @Log4j2
 public class ExpenseService {
@@ -99,5 +101,25 @@ public class ExpenseService {
         Map<String, Object> data = new HashMap<>();
         data.put("rowsUpdated", count);
         return data;
+    }
+
+    public Map<String, Object> initRestore(Integer userId) throws ExpenseException {
+        log.info("Initializing restore process");
+        List<Metadata> list = metadataRepository.findByUserIdAndStatusOrderByIdDesc(userId, "FINISHED");
+        if(list.isEmpty()) {
+            log.warn("No finished metadata found for user ID: {}", userId);
+            throw new ExpenseException("No finished metadata found for user ID: " + userId);
+        }
+        Metadata latest = list.get(0);
+        List<ExpenseEntity> records = expenseRepository.findByMetadataId(latest.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("metadataId", latest.getId());
+        response.put("totalCount", records.size());
+        long totalPage = records.size() / PAGE_SIZE;
+        if(records.size() % PAGE_SIZE != 0) {
+            totalPage++;
+        }
+        response.put("totalPages", totalPage);
+        return response;
     }
 }
