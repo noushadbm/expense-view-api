@@ -70,4 +70,17 @@ public class ExpenseController {
         log.info("Returning response from initRestore");
         return response;
     }
+
+    @GetMapping("/{userId}/restore/{metadataId}/page/{pageNo}")
+    public ApiResponse<ExpenseData> restorePage(@PathVariable Integer userId, @PathVariable Integer metadataId, @PathVariable Integer pageNo) throws ExpenseException {
+        log.info("Request received to restore metadataId {}, page {} for user: {}", metadataId, pageNo, userId);
+        ExpenseData expenseData = expenseService.restorePage(userId, metadataId, pageNo);
+        ApiResponse<ExpenseData> response = new ApiResponse<>();
+        response.setStatusCode(0);
+        response.setStatusMsg("SUCCESS");
+        response.setMessage("Expense restore initialized successfully");
+        response.setData(expenseData);
+        log.info("Returning response from initRestore");
+        return response;
+    }
 }

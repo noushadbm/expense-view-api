@@ -8,6 +8,9 @@ import com.rayshan.expenseview.modals.UserModal;
 import com.rayshan.expenseview.repositories.ExpenseRepository;
 import com.rayshan.expenseview.repositories.MetadataRepository;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -121,5 +124,30 @@ public class ExpenseService {
         }
         response.put("totalPages", totalPage);
         return response;
+    }
+
+    public ExpenseData restorePage(Integer userId, Integer metadataId, Integer pageNo) throws ExpenseException {
+        // Validate user and metadata
+        Metadata metadata = metadataRepository.findByIdAndUserId(metadataId, userId);
+        if(metadata == null) {
+            log.warn("Metadata with id {} not found for the given user id {}", metadataId, userId);
+            throw new ExpenseException("Metadata not found for the given user");
+        }
+
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE);
+        Page<ExpenseEntity> page = expenseRepository.findByMetadataId(metadata.getId(), pageable);
+        ExpenseData data = new ExpenseData();
+        data.setEntries(page.getContent().stream().map(item -> {
+            ExpenseData.Expense entry = new ExpenseData.Expense();
+            entry.setId(item.getId());
+            entry.setTitle(item.getTitle());
+            entry.setAmount(item.getAmount());
+            entry.setCategory(item.getCategory());
+            entry.setDescription(item.getDescription());
+            // Convert BigInteger to long for entryDate
+            entry.setEntryDate(item.getEntryDate().longValue());
+            return entry;
+        }).collect(Collectors.toList()));
+        return data;
     }
 }
